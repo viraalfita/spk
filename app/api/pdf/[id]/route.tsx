@@ -3,7 +3,6 @@ import { getSPKById } from "@/app/actions/spk";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { NextRequest, NextResponse } from "next/server";
-import { createElement } from "react";
 import SPKDocument from "./spk-document";
 
 export async function GET(
@@ -40,7 +39,7 @@ export async function GET(
 
     // Generate new PDF
     const pdfBuffer = await renderToBuffer(
-      createElement(SPKDocument, { spk, payments: payments || [] }),
+      <SPKDocument spk={spk} payments={payments || []} />,
     );
 
     // Upload to Supabase Storage
@@ -67,7 +66,8 @@ export async function GET(
       .eq("id", params.id);
 
     // Return the generated PDF
-    return new NextResponse(pdfBuffer, {
+    const arrayBuffer = new Uint8Array(pdfBuffer).buffer;
+    return new NextResponse(arrayBuffer, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="${fileName}"`,

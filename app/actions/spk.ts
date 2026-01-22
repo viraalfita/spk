@@ -92,6 +92,23 @@ export async function publishSPK(spkId: string) {
 
     if (error) throw error;
 
+    // Generate PDF URL by triggering the PDF generation endpoint
+    const pdfUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/pdf/${spk.id}`;
+
+    // Trigger PDF generation in the background
+    try {
+      await fetch(pdfUrl);
+    } catch (pdfError) {
+      console.error("Error generating PDF:", pdfError);
+    }
+
+    // Get the public URL for the PDF from storage
+    const fileName = `${spk.spk_number}.pdf`;
+    const filePath = `pdfs/${fileName}`;
+    const { data: publicUrlData } = supabaseAdmin.storage
+      .from("spk-files")
+      .getPublicUrl(filePath);
+
     // Trigger n8n webhook
     if (process.env.N8N_WEBHOOK_SPK_PUBLISHED) {
       try {
@@ -127,7 +144,7 @@ export async function publishSPK(spkId: string) {
             updatedAt: spk.updated_at,
             createdBy: spk.created_by,
             notes: spk.notes,
-            pdfUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/pdf/${spk.id}`,
+            pdfUrl: publicUrlData.publicUrl,
           }),
         });
       } catch (webhookError) {
