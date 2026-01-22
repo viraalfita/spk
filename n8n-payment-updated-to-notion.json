@@ -1,0 +1,160 @@
+{
+  "name": "SPK Payment Updated to Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "payment-updated",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-payment-updated",
+      "name": "Webhook - Payment Updated",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "payment-updated"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "YOUR_SLACK_CHANNEL_ID",
+        "text": "=*🔔 Payment Status Updated*\n\n*SPK Details:*\n• SPK Number: `{{ $json.spkNumber }}`\n• Project: {{ $json.projectName }}\n• Vendor: {{ $json.vendorName }}\n\n*Payment Information:*\n• Term: {{ $json.paymentTerm }}\n• Amount: {{ $json.currency }} {{ $json.paymentAmount.toLocaleString() }}\n• Status: *{{ $json.paymentStatus }}*\n• Percentage: {{ $json.paymentPercentage }}%\n{{ $json.paymentPaidDate ? '• Paid Date: ' + $json.paymentPaidDate : '' }}\n{{ $json.paymentReference ? '• Reference: ' + $json.paymentReference : '' }}\n\n*Contact:*\n• Email: {{ $json.vendorEmail }}\n• Phone: {{ $json.vendorPhone }}\n\n*Updated:* {{ $json.paymentUpdatedAt }}\n*Updated by:* {{ $json.paymentUpdatedBy }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        },
+        "blocksUi": {
+          "blocksValues": [
+            {
+              "type": "header",
+              "text": "🔔 Payment Status Updated"
+            },
+            {
+              "type": "section",
+              "fields": [
+                {
+                  "text": "*SPK Number:*\n{{ $json.spkNumber }}"
+                },
+                {
+                  "text": "*Status:*\n{{ $json.paymentStatus }}"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "fields": [
+                {
+                  "text": "*Project:*\n{{ $json.projectName }}"
+                },
+                {
+                  "text": "*Vendor:*\n{{ $json.vendorName }}"
+                }
+              ]
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "section",
+              "text": "*Payment Details*"
+            },
+            {
+              "type": "section",
+              "fields": [
+                {
+                  "text": "*Term:*\n{{ $json.paymentTerm }}"
+                },
+                {
+                  "text": "*Amount:*\n{{ $json.currency }} {{ $json.paymentAmount.toLocaleString() }}"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "fields": [
+                {
+                  "text": "*Percentage:*\n{{ $json.paymentPercentage }}%"
+                },
+                {
+                  "text": "*Paid Date:*\n{{ $json.paymentPaidDate || 'Not paid yet' }}"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "*Reference:* {{ $json.paymentReference || 'N/A' }}"
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "context",
+              "elements": [
+                {
+                  "text": "Updated: {{ $json.paymentUpdatedAt }} by {{ $json.paymentUpdatedBy }}",
+                  "type": "mrkdwn"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "id": "slack-send-message",
+      "name": "Send Slack Message",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Payment notification sent to Slack\", \"timestamp\": $json.ts } }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Payment Updated": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Slack Message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-22T00:00:00.000Z",
+  "versionId": "1"
+}
