@@ -95,6 +95,10 @@ export async function publishSPK(spkId: string) {
     // Trigger n8n webhook
     if (process.env.N8N_WEBHOOK_SPK_PUBLISHED) {
       try {
+        // Generate vendor link using vendor name (replace spaces with dashes)
+        const vendorSlug = spk.vendor_name.toLowerCase().replace(/\s+/g, "-");
+        const vendorLink = `${process.env.NEXT_PUBLIC_APP_URL}/vendor/${encodeURIComponent(vendorSlug)}`;
+
         await fetch(process.env.N8N_WEBHOOK_SPK_PUBLISHED, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,6 +109,7 @@ export async function publishSPK(spkId: string) {
             vendorName: spk.vendor_name,
             vendorEmail: spk.vendor_email,
             vendorPhone: spk.vendor_phone,
+            vendorLink: vendorLink,
             projectName: spk.project_name,
             projectDescription: spk.project_description,
             contractValue: spk.contract_value,
