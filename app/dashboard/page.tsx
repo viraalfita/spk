@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { getSPKs } from '@/app/actions/spk'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
+// Force dynamic rendering and disable cache
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function DashboardPage() {
     const { data: spks } = await getSPKs()
 

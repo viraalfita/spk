@@ -5,6 +5,10 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import PaymentUpdateButton from '@/components/spk/payment-update-button'
 import PublishButton from '@/components/spk/publish-button'
 
+// Force dynamic rendering and disable cache
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function SPKDetailPage({ params }: { params: { id: string } }) {
     const { data: spk, success } = await getSPKById(params.id)
 
