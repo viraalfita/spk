@@ -80,6 +80,13 @@ export async function updatePaymentStatus(
 
     revalidatePath(`/dashboard/${spkId}`);
     revalidatePath("/dashboard");
+
+    // Revalidate vendor dashboard if vendor info exists
+    if (spk && spk.vendor_name) {
+      const vendorSlug = spk.vendor_name.toLowerCase().replace(/\s+/g, "-");
+      revalidatePath(`/vendor/${vendorSlug}`);
+    }
+
     return { success: true, data: payment };
   } catch (error) {
     console.error("Error updating payment:", error);
