@@ -102,19 +102,15 @@ export async function publishSPK(spkId: string) {
       console.error("Error generating PDF:", pdfError);
     }
 
-    // Get the public URL for the PDF from storage
-    const fileName = `${spk.spk_number}.pdf`;
-    const filePath = `pdfs/${fileName}`;
-    const { data: publicUrlData } = supabaseAdmin.storage
-      .from("spk-files")
-      .getPublicUrl(filePath);
-
     // Trigger n8n webhook
     if (process.env.N8N_WEBHOOK_SPK_PUBLISHED) {
       try {
         // Generate vendor link using vendor name (replace spaces with dashes)
         const vendorSlug = spk.vendor_name.toLowerCase().replace(/\s+/g, "-");
         const vendorLink = `${process.env.NEXT_PUBLIC_APP_URL}/vendor/${encodeURIComponent(vendorSlug)}`;
+
+        // Generate PDF URL through API route (NOT Supabase storage URL)
+        const pdfApiUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/pdf/${spk.id}`;
 
         await fetch(process.env.N8N_WEBHOOK_SPK_PUBLISHED, {
           method: "POST",
@@ -144,7 +140,7 @@ export async function publishSPK(spkId: string) {
             updatedAt: spk.updated_at,
             createdBy: spk.created_by,
             notes: spk.notes,
-            pdfUrl: publicUrlData.publicUrl,
+            pdfUrl: pdfApiUrl,
           }),
         });
       } catch (webhookError) {

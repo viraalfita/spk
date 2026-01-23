@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 
 // Force dynamic rendering and disable cache
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function VendorDashboardPage({
